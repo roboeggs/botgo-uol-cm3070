@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Active Levels</title>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #000000;
+    --hint: #8e8e93;
+    --button: #2481cc;
+    --button-text: #ffffff;
+    --secondary-bg: #f2f2f7;
+    --card-bg: #ffffff;
+    --border: rgba(0, 0, 0, 0.08);
+    --green: #31a24c;
+    --red: #e53935;
+    --yellow: #f0a500;
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #17212b;
+    --text: #ffffff;
+    --hint: #7d8b99;
+    --button: #2b5278;
+    --button-text: #ffffff;
+    --secondary-bg: #232e3c;
+    --card-bg: #1e2a37;
+    --border: rgba(255, 255, 255, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+      --bg: #17212b;
+      --text: #ffffff;
+      --hint: #7d8b99;
+      --button: #2b5278;
+      --button-text: #ffffff;
+      --secondary-bg: #232e3c;
+      --card-bg: #1e2a37;
+      --border: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 12px;
+    padding-bottom: 80px;
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .badge { background: var(--secondary-bg); color: var(--hint); padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+
+  .search-wrap { position: relative; margin-bottom: 10px; }
+  .search-wrap input {
+    width: 100%; padding: 12px 16px 12px 40px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--secondary-bg);
+    color: var(--text); font-size: 15px; outline: none;
+  }
+  .search-wrap::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; opacity: .6; }
+
+  .sort-row, .filters { display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 2px; }
+  .sort-row::-webkit-scrollbar, .filters::-webkit-scrollbar { display: none; }
+  .chip {
+    padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--text); font-size: 13px;
+    white-space: nowrap; cursor: pointer; transition: .15s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .chip.active { background: var(--button); color: var(--button-text); border-color: var(--button); }
+
+  .touch-filter {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+    padding: 10px 14px; background: var(--secondary-bg); border-radius: 12px; font-size: 13px;
+  }
+  .touch-filter label { color: var(--hint); }
+  .touch-filter input {
+    width: 55px; padding: 6px 8px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--card-bg);
+    color: var(--text); font-size: 14px; text-align: center; outline: none;
+  }
+
+  .list-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--hint);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: .5px;
+  }
+
+  .ticker-list { display: flex; flex-direction: column; gap: 8px; }
+  .ticker-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ticker-item:active { background: var(--secondary-bg); }
+
+  .main-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    align-items: center;
+  }
+
+  .ticker-info { display: flex; flex-direction: column; gap: 2px; }
+  .ticker-symbol { font-weight: 700; font-size: 15px; letter-spacing: .3px; }
+  .fav-badge {
+    font-size: 10px; background: rgba(240,165,0,.15); color: var(--yellow);
+    padding: 2px 6px; border-radius: 6px; font-weight: 600; width: fit-content;
+  }
+
+  .col-val { font-size: 14px; font-weight: 600; }
+
+  .ml-badge { font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 6px; width: fit-content; }
+  .ml-badge.high { background: rgba(49,162,76,.15); color: var(--green); }
+  .ml-badge.mid  { background: rgba(240,165,0,.15); color: var(--yellow); }
+  .ml-badge.low  { background: rgba(229,57,53,.15); color: var(--red); }
+  .ml-badge.none { background: var(--secondary-bg); color: var(--hint); }
+
+  .levels-info { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+  .levels-count-group { display: flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.green { background: var(--green); }
+  .dot.gray  { background: #555; }
+
+  .chevron {
+    font-size: 12px;
+    color: var(--hint);
+    transition: transform .2s ease;
+  }
+  .ticker-item.expanded .chevron {
+    transform: rotate(180deg);
+  }
+
+  .levels-container {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+  .ticker-item.expanded .levels-container {
+    display: flex;
+  }
+
+  .level-card {
+    background: var(--secondary-bg);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .level-main-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    align-items: center;
+  }
+
+  .level-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .level-idx {
+    color: var(--hint);
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .level-type-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  .level-type-badge.support { background: rgba(49,162,76,.15); color: var(--green); }
+  .level-type-badge.resistance { background: rgba(229,57,53,.15); color: var(--red); }
+
+  /* selectable price */
+  .level-price {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    word-break: break-all;
+    -webkit-user-select: text;
+    user-select: text;
+    cursor: text;
+  }
+
+  .time-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    color: var(--hint);
+    padding-top: 4px;
+    border-top: 1px dotted var(--border);
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .time-item span { color: var(--text); font-weight: 500; }
+
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+  }
+  .btn-action {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--secondary-bg);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background .15s;
+  }
+  .btn-action:active {
+    background: var(--button);
+    color: var(--button-text);
+  }
+
+  .empty, .loading { text-align: center; padding: 40px 20px; color: var(--hint); }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--button); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .footer-hint { text-align: center; font-size: 12px; color: var(--hint); margin-top: 20px; }
+  .error-box { background: rgba(229,57,53,.1); border: 1px solid rgba(229,57,53,.3); color: var(--red); padding: 14px; border-radius: 10px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1 id="title">📊 Активные уровни</h1>
+  <span class="badge" id="totalBadge">—</span>
+</div>
+
+<div class="search-wrap">
+  <input type="text" id="searchInput" autocomplete="off" autocorrect="off" spellcheck="false">
+</div>
+
+<div class="sort-row" id="sortRow">
+  <button class="chip active" data-sort="fresh" data-i18n="sort_fresh">🕐 Обновлено</button>
+  <button class="chip" data-sort="touches" data-i18n="sort_touches">👆 Касания</button>
+  <button class="chip" data-sort="breakout" data-i18n="sort_breakout">🎯 Пробой</button>
+  <button class="chip" data-sort="volume" data-i18n="sort_volume">📊 Объём</button>
+  <button class="chip" data-sort="az" data-i18n="sort_az">🔤 A→Z</button>
+</div>
+
+<div class="filters" id="filtersRow">
+  <button class="chip" data-filter="favorites" data-i18n="filter_fav">❤️ Избранные</button>
+  <button class="chip" data-filter="touched_recent" data-i18n="filter_touched_recent">📅 Касались ≤2д</button>
+</div>
+
+<div class="touch-filter">
+  <label data-i18n="min_touches">Мин. касаний:</label>
+  <input type="number" id="touchMin" min="3" value="3" step="1" inputmode="numeric">
+</div>
+
+<div class="list-header">
+  <span data-i18n="col_ticker">Тикер</span>
+  <span data-i18n="col_touches">Касания</span>
+  <span data-i18n="col_prob">Пробой</span>
+  <span data-i18n="col_levels">Уровни</span>
+</div>
+
+<div class="ticker-list" id="tickerList">
+  <div class="loading"><div class="spinner"></div><span data-i18n="loading">Загрузка...</span></div>
+</div>
+
+<div class="footer-hint" data-i18n="footer_hint">Нажми на карточку, чтобы развернуть уровни</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const GIST_URL = 'https://gist.githubusercontent.com/raw/48a088b813f9ffa9a26b05250231d0e2/coin_list.json';
+
+const LANG = (params.get('lang') || 'ru').toLowerCase();
+const THEME = (params.get('theme') || 'auto').toLowerCase();
+const FAV_PARAM = params.get('fav') || '';
+
+const favorites = new Set(
+  FAV_PARAM.split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean)
+    .map(s => s.endsWith('USDT') ? s : s + 'USDT')
+);
+
+function initTheme() {
+  const root = document.documentElement;
+  if (THEME === 'light' || THEME === 'dark') {
+    root.dataset.theme = THEME;
+  } else {
+    root.dataset.theme = 'auto';
+  }
+}
+initTheme();
+
+let tgReady = false;
+window.addEventListener('DOMContentLoaded', () => {
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    try {
+      tg.ready();
+      tg.expand();
+      tgReady = true;
+
+      if (THEME === 'auto' && tg.themeParams) {
+        const p = tg.themeParams;
+        const r = document.documentElement.style;
+        if (p.bg_color) r.setProperty('--bg', p.bg_color);
+        if (p.text_color) r.setProperty('--text', p.text_color);
+        if (p.hint_color) r.setProperty('--hint', p.hint_color);
+        if (p.button_color) r.setProperty('--button', p.button_color);
+        if (p.button_text_color) r.setProperty('--button-text', p.button_text_color);
+        if (p.secondary_bg_color) r.setProperty('--secondary-bg', p.secondary_bg_color);
+      }
+    } catch (e) {}
+  }
+});
+
+const I18N = {
+  ru: {
+    title: '📊 Активные уровни',
+    search_ph: 'Поиск тикера...',
+    sort_fresh: '🕐 Обновлено',
+    sort_touches: '👆 Касания',
+    sort_breakout: '🎯 Пробой',
+    sort_volume: '📊 Объём',
+    sort_az: '🔤 A→Z',
+    filter_fav: '❤️ Избранные',
+    filter_touched_recent: '📅 Касались ≤2д',
+    filter_fresh: '✨ Свежие',
+    min_touches: 'Мин. касаний:',
+    loading: 'Загрузка...',
+    footer_hint: 'Нажми на карточку, чтобы развернуть уровни',
+    total: 'монет',
+    nothing: 'Ничего не найдено',
+    nothing_sub: 'Попробуй изменить фильтры',
+    load_error: 'Не удалось загрузить данные',
+    col_ticker: 'Тикер',
+    col_touches: 'Касаний',
+    col_prob: 'Пробой',
+    col_levels: 'Уровни',
+    fav_label: '❤️ Избранное',
+    first_touch: '1-е касание:',
+    last_touch: 'Последнее касание:',
+    level_age: 'Возраст уровня:',
+    levels_count: 'ур.',
+    no_levels: 'нет уровней',
+    support: '🟢 Поддержка',
+    resistance: '🔴 Сопротивление',
+    open_chart: '📈 Открыть график',
+    send_chat: '💬 Карточка в чат',
+    months: ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'],
+    days_short: 'д',
+    hours_short: 'ч',
+    just_created: 'только создан',
+    back_chat: '💬 В чат'
+  },
+  en: {
+    title: '📊 Active Levels',
+    search_ph: 'Search ticker...',
+    sort_fresh: '🕐 Updated',
+    sort_touches: '👆 Touches',
+    sort_breakout: '🎯 Breakout',
+    sort_volume: '📊 Volume',
+    sort_az: '🔤 A→Z',
+    filter_fav: '❤️ Favorites',
+    filter_touched_recent: '📅 Touched ≤2d',
+    filter_fresh: '✨ Recent',
+    min_touches: 'Min touches:',
+    loading: 'Loading...',
+    footer_hint: 'Tap card to expand levels',
+    total: 'coins',
+    nothing: 'Nothing found',
+    nothing_sub: 'Try adjusting filters',
+    load_error: 'Failed to load data',
+    col_ticker: 'Ticker',
+    col_touches: 'Touches',
+    col_prob: 'Breakout',
+    col_levels: 'Levels',
+    fav_label: '❤️ Favorite',
+    first_touch: '1st touch:',
+    last_touch: 'Last touch:',
+    level_age: 'Level age:',
+    levels_count: 'lvl',
+    no_levels: 'no levels',
+    support: '🟢 Support',
+    resistance: '🔴 Resistance',
+    open_chart: '📈 Open Chart',
+    send_chat: '💬 Send to Chat',
+    months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    days_short: 'd',
+    hours_short: 'h',
+    just_created: 'just created',
+    back_chat: '💬 Back to Chat'
+  }
+};
+const T = I18N[LANG] || I18N.ru;
+
+function applyI18n() {
+  document.documentElement.lang = LANG;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (T[k]) el.textContent = T[k];
+  });
+  document.getElementById('title').textContent = T.title;
+  document.getElementById('searchInput').placeholder = T.search_ph;
+  document.querySelector('.footer-hint').textContent = T.footer_hint;
+}
+
+let allTickers = [];
+const state = {
+  search: '',
+  sort: 'fresh',
+  filters: new Set(),
+  minTouches: 3,
+};
+
+async function loadTickers() {
+  const list = document.getElementById('tickerList');
+  try {
+    const resp = await fetch(GIST_URL, { cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    allTickers = data.tickers || [];
+    document.getElementById('totalBadge').textContent = allTickers.length + ' ' + T.total;
+  } catch (e) {
+    list.innerHTML = `<div class="error-box"><b>${T.load_error}</b></div>`;
+    return;
+  }
+  render();
+}
+
+function formatExactDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '—';
+  const months = T.months || I18N.ru.months;
+  const month = months[d.getMonth()];
+  const day = d.getDate();
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${day} ${month}, ${hours}:${minutes}`;
+}
+
+function formatPrice(val) {
+  if (val == null || val === '') return '—';
+  const num = Number(val);
+  if (isNaN(num)) return String(val);
+  if (num === 0) return '0';
+
+  const abs = Math.abs(num);
+  let decimals;
+  if (abs >= 1000)      decimals = 2;
+  else if (abs >= 100)  decimals = 3;
+  else if (abs >= 10)   decimals = 4;
+  else if (abs >= 1)    decimals = 4;
+  else if (abs >= 0.1)  decimals = 5;
+  else if (abs >= 0.01) decimals = 6;
+  else if (abs >= 0.001) decimals = 7;
+  else if (abs >= 0.0001) decimals = 8;
+  else                  decimals = 10;
+
+  return num.toFixed(decimals);
+}
+
+function calculateLevelAge(firstIso, lastIso) {
+  if (!firstIso || !lastIso) return '—';
+  const diffMs = new Date(lastIso).getTime() - new Date(firstIso).getTime();
+  if (isNaN(diffMs) || diffMs <= 0) return T.just_created;
+
+  const totalHrs = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(totalHrs / 24);
+  const hrs = totalHrs % 24;
+
+  if (days > 0) return `${days}${T.days_short} ${hrs}${T.hours_short}`;
+  return `${hrs}${T.hours_short}`;
+}
+
+function maxTouches(t) {
+  return (t.levels || []).reduce((m, l) => Math.max(m, l.touch_count || 0), 0);
+}
+
+function maxBreakout4h(t) {
+  return (t.levels || []).reduce((m, l) => {
+    const p = l.ml && l.ml.breakout_4h != null ? l.ml.breakout_4h : 0;
+    return Math.max(m, p);
+  }, 0);
+}
+
+function mlBadgeClass(p) {
+  if (p == null || p === 0) return 'none';
+  if (p >= 0.6) return 'high';
+  if (p >= 0.3) return 'mid';
+  return 'low';
+}
+
+function getLevelTypeInfo(lvl, currentPrice) {
+  const typeStr = String(lvl.type || lvl.kind || lvl.side || '').toLowerCase();
+
+  if (typeStr.includes('sup') || typeStr.includes('поддержка') || lvl.is_support === true) {
+    return { label: T.support, cssClass: 'support' };
+  }
+  if (typeStr.includes('res') || typeStr.includes('сопротивление') || lvl.is_support === false) {
+    return { label: T.resistance, cssClass: 'resistance' };
+  }
+
+  const lvlPrice = lvl.center ?? lvl.price;
+  if (currentPrice && lvlPrice) {
+    if (lvlPrice < currentPrice) return { label: T.support, cssClass: 'support' };
+    return { label: T.resistance, cssClass: 'resistance' };
+  }
+
+  return { label: T.support, cssClass: 'support' };
+}
+
+function render() {
+  const list = document.getElementById('tickerList');
+  let items = [...allTickers];
+
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    items = items.filter(t => t.symbol.toLowerCase().includes(q));
+  }
+  if (state.filters.has('favorites')) {
+    items = items.filter(t => favorites.has(t.symbol));
+  }
+  if (state.filters.has('touched_recent')) {
+    // recent: last touch within 2 days
+    const limit = Date.now() - 2 * 24 * 3600_000;
+    items = items.filter(t =>
+      (t.levels || []).some(l => new Date(l.last_touch_time).getTime() >= limit)
+    );
+  }
+  if (state.minTouches > 0) {
+    items = items.filter(t => maxTouches(t) >= state.minTouches);
+  }
+
+  switch (state.sort) {
+    case 'fresh':    items.sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at)); break;
+    case 'touches':  items.sort((a,b) => maxTouches(b) - maxTouches(a)); break;
+    case 'breakout': items.sort((a,b) => maxBreakout4h(b) - maxBreakout4h(a)); break;
+    case 'volume':   items.sort((a,b) => (b.quote_volume_24h||0) - (a.quote_volume_24h||0)); break;
+    case 'az':       items.sort((a,b) => a.symbol.localeCompare(b.symbol)); break;
+  }
+
+  if (!items.length) {
+    list.innerHTML = `<div class="empty">${T.nothing}<br><small>${T.nothing_sub}</small></div>`;
+    return;
+  }
+
+  list.innerHTML = items.map(t => {
+    const isFav = favorites.has(t.symbol);
+    const touches = maxTouches(t);
+    const prob = maxBreakout4h(t);
+    const probText = prob ? Math.round(prob * 100) + '%' : '—';
+    const levels = t.levels || [];
+    const hasLevels = levels.length > 0;
+
+    const levelsCardsHtml = levels.map((lvl, idx) => {
+      const lvlTouches = lvl.touch_count || 0;
+      const lvlProb = lvl.ml && lvl.ml.breakout_4h != null ? lvl.ml.breakout_4h : null;
+      const lvlProbText = lvlProb != null ? Math.round(lvlProb * 100) + '%' : '—';
+      const priceText = formatPrice(lvl.center ?? lvl.price);
+      const typeInfo = getLevelTypeInfo(lvl, t.current_price);
+
+      const firstTouch = lvl.first_touch_time;
+      const lastTouch = lvl.last_touch_time;
+      const age = calculateLevelAge(firstTouch, lastTouch);
+
+      return `
+        <div class="level-card">
+          <div class="level-main-row">
+            <div class="level-title-group">
+              <span class="level-idx">#${idx + 1}</span>
+              <span class="level-type-badge ${typeInfo.cssClass}">${typeInfo.label}</span>
+            </div>
+            <div class="col-val">${lvlTouches}</div>
+            <div>
+              <span class="ml-badge ${mlBadgeClass(lvlProb)}">${lvlProbText}</span>
+            </div>
+            <div class="level-price">${priceText}</div>
+          </div>
+
+          <div class="time-details">
+            <div class="time-row">
+              <div class="time-item">${T.first_touch} <span>${formatExactDate(firstTouch)}</span></div>
+              <div class="time-item">${T.last_touch} <span>${formatExactDate(lastTouch)}</span></div>
+            </div>
+            <div class="time-row">
+              <div class="time-item">${T.level_age} <span>${age}</span></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="ticker-item" data-ticker="${t.symbol}">
+        <div class="main-row">
+          <div class="ticker-info">
+            <span class="ticker-symbol">${t.symbol}</span>
+            ${isFav ? `<span class="fav-badge">${T.fav_label}</span>` : ''}
+          </div>
+          <div class="col-val">${touches}</div>
+          <div>
+            <span class="ml-badge ${mlBadgeClass(prob)}">${probText}</span>
+          </div>
+          <div class="levels-info">
+            <div class="levels-count-group">
+              <span class="dot ${hasLevels ? 'green' : 'gray'}"></span>
+              <span class="col-val">${hasLevels ? levels.length + ' ' + T.levels_count : T.no_levels}</span>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+
+        ${hasLevels ? `
+          <div class="levels-container">
+            ${levelsCardsHtml}
+            <div class="card-actions">
+              <button class="btn-action open-chart-btn" data-ticker="${t.symbol}">
+                ${T.open_chart}
+              </button>
+              <button class="btn-action back-chat-btn" data-ticker="${t.symbol}">
+                ${T.back_chat}
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.ticker-item').forEach(el => {
+    // track pointer to detect drag
+    let downX = 0;
+    let downY = 0;
+
+    el.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+    });
+
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.btn-action')) return;
+
+      // don't collapse on text selection
+      const sel = window.getSelection();
+      if (sel && sel.toString().trim().length > 0) return;
+
+      // ignore drag gestures
+      const movedX = Math.abs(e.clientX - downX);
+      const movedY = Math.abs(e.clientY - downY);
+      if (movedX > 8 || movedY > 8) return;
+
+      el.classList.toggle('expanded');
+    });
+
+    const chartBtn = el.querySelector('.open-chart-btn');
+    if (chartBtn) {
+      chartBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openChart(chartBtn.dataset.ticker);
+      });
+    }
+
+    const backBtn = el.querySelector('.back-chat-btn');
+    if (backBtn) {
+      backBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        backToChat();
+      });
+    }
+  });
+}
+
+function backToChat() {
+  const tg = window.Telegram?.WebApp;
+  if (tg && typeof tg.close === 'function') {
+    try { tg.close(); return; } catch (e) {}
+  }
+  window.close();
+}
+
+function openChart(ticker) {
+  const url = `https://www.tradingview.com/chart/?symbol=BINANCE:${ticker}`;
+  const tg = window.Telegram?.WebApp;
+  if (tg && typeof tg.openLink === 'function') {
+    try { tg.openLink(url); return; } catch (e) {}
+  }
+  window.open(url, '_blank');
+}
+
+function sendTickerToChat(ticker) {
+  const tg = window.Telegram?.WebApp;
+  const payload = JSON.stringify({ action: 'open_ticker', ticker });
+  if (tg && tgReady && typeof tg.sendData === 'function') {
+    try { tg.sendData(payload); } catch (e) {}
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  state.search = e.target.value.trim();
+  render();
+});
+
+document.getElementById('sortRow').addEventListener('click', e => {
+  const btn = e.target.closest('.chip');
+  if (!btn) return;
+  document.querySelectorAll('#sortRow .chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.sort = btn.dataset.sort;
+  render();
+});
+
+document.getElementById('filtersRow').addEventListener('click', e => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const f = chip.dataset.filter;
+  if (state.filters.has(f)) { state.filters.delete(f); chip.classList.remove('active'); }
+  else { state.filters.add(f); chip.classList.add('active'); }
+  render();
+});
+
+const touchInput = document.getElementById('touchMin');
+touchInput.addEventListener('input', () => {
+  let v = parseInt(touchInput.value, 10);
+  if (isNaN(v) || v < 3) v = 3;
+  state.minTouches = v;
+  render();
+});
+
+applyI18n();
+loadTickers();
+</script>
+</body>
+</html>

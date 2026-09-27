@@ -1,0 +1,225 @@
+greeting:
+  other: |
+    👋 <b>Hi, {{.Name}}!</b>
+
+    I show active support and resistance levels on crypto markets and can analyze them with AI.
+
+    <b>How to use:</b>
+
+    📊 <b>Market</b> — list of all active coins with search and filters
+    ⭐ <b>Favorites</b> — your coins at hand
+    🔍 <b>Screener</b> — market overview and charts
+    ⚙️ <b>Settings</b> — language
+
+    <b>Just type a ticker</b> — e.g. <code>BTC</code>, <code>SUI</code> or <code>ETHUSDT</code> — and I'll send a level card.
+
+    <b>AI analysis:</b> command <code>/ai</code> + your question.
+    Examples:
+    • <code>/ai tell me about BTCUSDT</code>
+    • <code>/ai what's interesting right now?</code>
+    • <code>/ai compare BTC and ETH</code>
+
+    Start with <b>📊 Market</b> below or type a ticker right now.
+
+help_message:
+  other: |
+    <b>🤖 Help</b>
+
+    <b>Main actions:</b>
+    • <b>Type a ticker</b> — e.g. <code>BTC</code>, <code>SUI</code> or <code>ETHUSDT</code> — I'll send a card with active support/resistance levels.
+    • <b>📊 Market</b> — list of all coins with active levels. Search, filters and sorting inside.
+    • <b>⭐ Favorites</b> — your saved coins. Add a coin from its ticker card.
+    • <b>🔍 Screener</b> — market overview and charts.
+    • <b>⚙️ Settings</b> — interface language.
+
+    <b>Commands:</b>
+    /start — start, show keyboard
+    /help — this help
+    /db <code>&lt;TICKER&gt;</code> — ticker card (same as just typing the ticker)
+    /db_tickers — list of all active coins
+    /ai <code>&lt;question&gt;</code> — AI market analysis
+
+    <b>AI examples:</b>
+    • <code>/ai tell me about BTCUSDT</code>
+    • <code>/ai what's interesting right now?</code>
+    • <code>/ai compare BTC and ETH</code>
+    • <code>/ai what is RSI?</code>
+
+    <b>About levels:</b>
+    🟢 <b>Support</b> — below current price, where price may bounce up.
+    🔴 <b>Resistance</b> — above current price, where price may pull back down.
+    More touches + more recent last touch = stronger level.
+
+lang_changed:
+  other: "You have selected English! 🇬🇧"
+
+unknown_action:
+  other: "Unknown action."
+
+echo:
+  other: "You wrote: {{.Text}}"
+
+access_denied:
+  other: "You don't have access to this bot."
+
+message_too_long:
+  other: "Message is too long: maximum {{.Limit}} words."
+
+rate_limit_exceeded:
+  other: "Too many requests. Please wait a minute and try again."
+
+db_usage:
+  other: "Please specify a ticker. Example: /db ETHUSDT"
+
+db_error:
+  other: "❌ Database query error"
+
+db_ticker_not_found:
+  other: "⚠️ No record found for ticker {{.Ticker}}"
+
+db_header:
+  other: |
+    📊 <b>Ticker info: {{.Ticker}}</b>
+
+    • <b>Active levels count:</b> <code>{{.ActiveCount}}</code>
+    • <b>Status (has active levels):</b> {{.Status}}
+    • <b>Last scan:</b> {{.SavedAt}}
+
+db_levels_title:
+  other: "📈 <b>Active levels:</b>"
+
+db_level_number:
+  other: "<b>{{.Number}}. {{.Type}}</b>"
+
+db_level_type_support:
+  other: "Support"
+
+db_level_type_resistance:
+  other: "Resistance"
+
+db_level_price:
+  other: "💵 <b>Price:</b> <code>{{.Price}}</code>"
+
+db_level_range:
+  other: "📏 <b>Range:</b> <code>{{.Range}}</code>"
+
+db_level_strength:
+  other: "🔄 Touches: {{.Count}} (first {{.FirstTouchAt}}, last {{.LastTouchAt}})"
+
+db_level_touches:
+  other: "🕒 <b>Touch times:</b>{{.Touches}}"
+
+db_tickers_error:
+  other: "❌ Failed to fetch tickers list"
+
+db_tickers_empty:
+  other: "There are currently no tickers with active levels."
+
+db_tickers_header:
+  other: "📈 <b>Tickers with active levels:</b>"
+
+db_tickers_total:
+  other: "Total found: <b>{{.Count}}</b>"
+
+db_open_chart_btn:
+  other: "📊 Open the {{.Ticker}} chart"
+
+ai_usage:
+  other: |
+    Write your question after /ai
+
+    For example:
+    /ai Which coins currently have active levels?
+
+ai_error:
+  other: "Failed to get a response from AI. Please try again."
+
+ml_error:
+  other: "❌ Failed to run model prediction."
+
+ml_predict:
+  other: |
+    🤖 <b>ML Level Prediction</b>
+
+    • <b>Signal probability:</b> <code>{{.Probability}}%</code>
+    • <b>Predicted class:</b> <code>{{.Class}}</code>
+    • <b>Decision threshold:</b> <code>{{.Threshold}}</code>
+
+favorites_coming_soon: 
+  other: "⭐ Favorites will be available in the next update."
+
+
+
+favorites_header:
+  other: "⭐ <b>Favorites</b> {{.Count}}"
+favorites_empty:
+  other: "⭐ Favorites list is empty.\n\nOpen a ticker card and tap \"Add to Favorites\"."
+favorites_manage_title:
+  other: "✏️ Manage Favorites\n\nTap a ticker to remove it:"
+favorites_manage_btn:
+  other: "✏️ Manage"
+favorites_done_btn:
+  other: "✅ Done"
+favorites_open_btn:
+  other: "📊 Open List"
+favorites_limit_reached:
+  other: "⚠️ Favorites limit reached (100)"
+favorites_invalid:
+  other: "⚠️ Invalid ticker"
+fav_btn_add:
+  other: "⭐ Add to Favorites"
+fav_btn_remove:
+  other: "🗑 Remove from Favorites"
+market_open_btn:
+  other: "📊 Open Market"
+market_hint:
+  other: "Tap to open the active tickers list:"
+webapp_not_configured:
+  other: "⚠️ WebApp is not configured"
+settings_coming_soon:
+  other: "⚙️ Settings will be available in the next update"
+
+
+btn_market:
+  other: "📊 Market"
+btn_favorites:
+  other: "⭐ Favorites"
+btn_screener:
+  other: "🔍 Screener"
+btn_settings:
+  other: "⚙️ Settings"
+
+settings_title:
+  other: "⚙️ <b>Settings</b>\n\nChoose interface language:"
+
+ai_unknown: 
+  other: |
+    🤔 Couldn't understand the query.
+
+    Try:
+    • Tell me about BTCUSDT
+    • What's interesting right now?
+    • Compare BTC and ETH
+    • What is RSI?
+
+ai_thinking: 
+  other: "🤔 Thinking..."
+ai_stage_classify: 
+  other: "Classifying query"
+ai_stage_loading: 
+  other: "Loading data"
+ai_stage_loading_ticker: 
+  other: "Loading data for {Ticker}"
+ai_stage_loading_top: 
+  other: "Picking top by ML"
+ai_stage_comparing: 
+  other: "Comparing tickers"
+ai_stage_analyzing: 
+  other: "Analyzing"
+ai_stage_analyzing_ticker: 
+  other: "Analyzing {Ticker}"
+
+"ai_timeout":  
+  other: "⏱ The model took too long. Try a shorter query."
+"ai_empty":   
+  other: "🤔 Couldn't produce an answer. Try rephrasing."

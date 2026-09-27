@@ -1,0 +1,228 @@
+greeting:
+  other: |
+    👋 <b>Привет, {{.Name}}!</b>
+
+    Я показываю активные уровни поддержки и сопротивления на крипторынке и умею анализировать их с помощью AI.
+
+    <b>Как пользоваться:</b>
+
+    📊 <b>Рынок</b> — список всех активных монет с поиском и фильтрами
+    ⭐ <b>Избранное</b> — твои монеты под рукой
+    🔍 <b>Скринер</b> — обзор рынка и графики
+    ⚙️ <b>Настройки</b> — смена языка
+
+    <b>Можно просто написать тикер</b> — например <code>BTC</code>, <code>SUI</code> или <code>ETHUSDT</code> — и я пришлю карточку с уровнями.
+
+    <b>AI-анализ:</b> команда <code>/ai</code> + вопрос.
+    Примеры:
+    • <code>/ai расскажи про BTCUSDT</code>
+    • <code>/ai что сейчас интересного?</code>
+    • <code>/ai сравни BTC и ETH</code>
+
+    Начни с кнопки <b>📊 Рынок</b> ниже или напиши тикер прямо сейчас.
+
+
+help_message:
+  other: |
+    <b>🤖 Помощь</b>
+
+    <b>Основные действия:</b>
+    • <b>Напиши тикер</b> — например <code>BTC</code>, <code>SUI</code> или <code>ETHUSDT</code> — пришлю карточку с активными уровнями поддержки и сопротивления.
+    • <b>📊 Рынок</b> — открыть список всех монет с активными уровнями. Внутри есть поиск, фильтры и сортировка.
+    • <b>⭐ Избранное</b> — твои сохранённые монеты. Добавить в избранное можно из карточки тикера.
+    • <b>🔍 Скринер</b> — обзор рынка и графики.
+    • <b>⚙️ Настройки</b> — смена языка интерфейса.
+
+    <b>Команды:</b>
+    /start — начать работу, показать клавиатуру
+    /help — эта справка
+    /db <code>&lt;ТИКЕР&gt;</code> — карточка тикера (то же, что просто написать тикер)
+    /db_tickers — список всех активных монет
+    /ai <code>&lt;вопрос&gt;</code> — AI-анализ рынка
+
+    <b>Примеры AI-запросов:</b>
+    • <code>/ai расскажи про BTCUSDT</code>
+    • <code>/ai что сейчас интересного?</code>
+    • <code>/ai сравни BTC и ETH</code>
+    • <code>/ai что такое RSI?</code>
+
+    <b>Про уровни:</b>
+    🟢 <b>Поддержка</b> — цена ниже текущей, куда цена может откатиться и отскочить.
+    🔴 <b>Сопротивление</b> — цена выше текущей, где возможен откат вниз.
+    Чем больше касаний и чем свежее последнее — тем сильнее уровень.
+    
+
+lang_changed:
+  other: "Вы выбрали русский язык! 🇷🇺"
+
+unknown_action:
+  other: "Неизвестное действие."
+
+echo:
+  other: "Ты написал: {{.Text}}"
+
+access_denied:
+  other: "У вас нет доступа к этому боту."
+
+message_too_long:
+  other: "Message is too long: maximum {{.Limit}} words."
+
+rate_limit_exceeded:
+  other: "Слишком много запросов. Пожалуйста, подождите минуту и попробуйте снова."
+
+db_usage:
+  other: "Пожалуйста, укажите тикер. Пример: /db ETHUSDT"
+
+db_error:
+  other: "❌ Ошибка при запросе к базе данных"
+
+db_ticker_not_found:
+  other: "⚠️ Запись для тикера {{.Ticker}} не найдена"
+
+db_header:
+  other: |
+    📊 <b>Информация по тикеру {{.Ticker}}</b>
+
+    • <b>Количество активных уровней:</b> <code>{{.ActiveCount}}</code>
+    • <b>Статус (Есть активные):</b> {{.Status}}
+    • <b>Последнее сканирование:</b> {{.SavedAt}}
+
+db_levels_title:
+  other: "📈 <b>Активные уровни:</b>"
+
+db_level_number:
+  other: "<b>{{.Number}}. {{.Type}}</b>"
+
+db_level_type_support:
+  other: "Поддержка"
+
+db_level_type_resistance:
+  other: "Сопротивление"
+
+db_level_price:
+  other: "💵 <b>Цена:</b> <code>{{.Price}}</code>"
+
+db_level_range:
+  other: "📏 <b>Диапазон:</b> <code>{{.Range}}</code>"
+
+db_level_strength:
+  other: "🔄 Касаний: {{.Count}} (первое {{.FirstTouchAt}}, последнее {{.LastTouchAt}})"
+
+db_level_touches:
+  other: "🕒 <b>Время касаний:</b>{{.Touches}}"
+
+db_tickers_error:
+  other: "❌ Ошибка при получении списка тикеров"
+
+db_tickers_empty:
+  other: "На данный момент нет тикеров с активными уровнями."
+
+db_tickers_header:
+  other: "📈 <b>Тикеры с активными уровнями:</b>"
+
+db_tickers_total:
+  other: "Всего найдено: <b>{{.Count}}</b>"
+
+db_open_chart_btn:
+  other: "📊 Открыть график {{.Ticker}}"
+
+ai_usage:
+  other: |
+    Напиши вопрос после /ai
+
+    Например:
+    /ai Какие монеты сейчас имеют активные уровни?
+
+ai_error:
+  other: "Не удалось получить ответ от AI. Попробуй ещё раз."
+
+ml_error:
+  other: "❌ Ошибка при выполнении прогноза модели."
+
+ml_predict:
+  other: |
+    🤖 <b>ML Прогноз уровня</b>
+
+    • <b>Вероятность сигнала:</b> <code>{{.Probability}}%</code>
+    • <b>Прогноз класса:</b> <code>{{.Class}}</code>
+    • <b>Порог принятия решения:</b> <code>{{.Threshold}}</code>
+
+
+favorites_coming_soon: 
+  other: "⭐ Избранное появится в следующем обновлении"
+
+
+
+favorites_header:
+  other: "⭐ <b>Избранное</b> {{.Count}}"
+favorites_empty:
+  other: "⭐ Избранное пусто.\n\nОткрой карточку тикера и нажми «В избранное»."
+favorites_manage_title:
+  other: "✏️ Управление избранным\n\nНажми на тикер, чтобы удалить:"
+favorites_manage_btn:
+  other: "✏️ Управлять"
+favorites_done_btn:
+  other: "✅ Готово"
+favorites_open_btn:
+  other: "📊 Открыть список"
+favorites_limit_reached:
+  other: "⚠️ Достигнут лимит избранного (100)"
+favorites_invalid:
+  other: "⚠️ Некорректный тикер"
+fav_btn_add:
+  other: "⭐ В избранное"
+fav_btn_remove:
+  other: "🗑 Убрать из избранного"
+market_open_btn:
+  other: "📊 Открыть рынок"
+market_hint:
+  other: "Нажми, чтобы открыть список активных тикеров:"
+webapp_not_configured:
+  other: "⚠️ WebApp не настроен"
+settings_coming_soon:
+  other: "⚙️ Настройки появятся в следующем обновлении"
+
+
+btn_market:
+  other: "📊 Рынок"
+btn_favorites:
+  other: "⭐ Избранное"
+btn_screener:
+  other: "🔍 Скринер"
+btn_settings:
+  other: "⚙️ Настройки"
+
+settings_title:
+  other: "⚙️ <b>Настройки</b>\n\nВыбери язык интерфейса:"
+
+ai_unknown: 
+  other: |
+    🤔 Не понял запрос.
+
+    Попробуй так:
+    • Расскажи про BTCUSDT
+    • Что сейчас интересного?
+    • Сравни BTC и ETH
+    • Что такое RSI?
+
+ai_thinking:
+  other: "🤔 Думаю..."
+ai_stage_classify:
+  other: "Классифицирую запрос"
+ai_stage_loading: 
+  other: "Загружаю данные"
+ai_stage_loading_ticker: 
+  other: "Загружаю данные {Ticker}"
+ai_stage_loading_top: 
+  other: "Отбираю топ по ML"
+ai_stage_comparing: 
+  other: "Сравниваю тикеры"
+ai_stage_analyzing: 
+  other: "Анализирую"
+ai_stage_analyzing_ticker: 
+  other: "Анализирую {Ticker}"
+
+"ai_timeout":  
+  other: "⏱ Модель не успела ответить. Попробуйте переформулировать короче."
+"ai_empty":   
+  other: "🤔 Не удалось сформировать ответ. Попробуйте переформулировать."

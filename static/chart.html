@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Market Data</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        #root {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script>
+    (function () {
+        // read query parameters
+        const params = new URLSearchParams(window.location.search);
+
+        const mode = params.get('mode') || (params.get('ticker') ? 'chart' : 'market');
+        const ticker = (params.get('ticker') || '').trim();
+        const tickersRaw = (params.get('tickers') || '').trim();
+
+        const lang = params.get('lang')
+            || localStorage.getItem('botgo_lang')
+            || 'ru';
+        localStorage.setItem('botgo_lang', lang);
+
+        // constants (defined before use)
+        const GIST_URL = 'https://gist.githubusercontent.com/raw/48a088b813f9ffa9a26b05250231d0e2/coin_list.json';
+
+        // init Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
+            tg.ready();
+            tg.expand();
+            if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
+        }
+
+        // add exchange prefix if missing
+        function normalizeSymbol(s) {
+            s = (s || '').trim().toUpperCase();
+            if (!s) return '';
+            return s.includes(':') ? s : 'BINANCE:' + s;
+        }
+
+        const root = document.getElementById('root');
+
+        if (mode === 'chart' && ticker) {
+            renderAdvancedChart(normalizeSymbol(ticker), lang);
+        } else {
+            renderMarketHeatmap(tickersRaw, lang);
+        }
+
+        // advanced chart mode
+        function renderAdvancedChart(symbol, lang) {
+            const tvLocale = (lang === 'ru') ? 'ru' : 'en';
+            document.title = symbol + ' — TradingView';
+
+            const container = document.createElement('div');
+            container.className = 'tradingview-widget-container';
+            container.style.height = '100%';
+            container.style.width = '100%';
+
+            const inner = document.createElement('div');
+            inner.className = 'tradingview-widget-container__widget';
+            inner.style.height = '100%';
+            inner.style.width = '100%';
+            container.appendChild(inner);
+
+            root.appendChild(container);
+
+            const config = {
+                allow_symbol_change: true,
+                calendar: false,
+                details: false,
+                hide_side_toolbar: false,
+                hide_top_toolbar: false,
+                hide_legend: false,
+                hide_volume: false,
+                hotlist: false,
+                interval: '60',
+                locale: tvLocale,
+                save_image: true,
+                style: '1',
+                symbol: symbol,
+                theme: 'light',
+                timezone: 'Etc/UTC',
+                backgroundColor: '#ffffff',
+                gridColor: 'rgba(46, 46, 46, 0.2)',
+                watchlist: [],
+                withdateranges: false,
+                compareSymbols: [],
+                support_host: 'https://www.tradingview.com',
+                studies: [],
+                autosize: true
+            };
+
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+            script.async = true;
+            script.innerHTML = JSON.stringify(config);
+            container.appendChild(script);
+        }
+
+        // market heatmap mode
+        async function renderMarketHeatmap(tickersRaw, lang) {
+            const sectionName = (lang === 'en') ? 'Crypto' : 'Криптовалюты';
+            document.title = (lang === 'en') ? 'Crypto Market' : 'Крипто-рынок';
+
+            let symbols = [];
+
+            if (tickersRaw) {
+                symbols = tickersRaw
+                    .split(',')
+                    .map(normalizeSymbol)
+                    .filter(Boolean);
+            } else {
+                root.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tg-theme-hint-color,#999);">Загрузка...</div>';
+                try {
+                    const resp = await fetch(GIST_URL, { cache: 'no-store' });
+                    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+                    const data = await resp.json();
+                    const tickers = (data.tickers || []).map(t => t.symbol);
+                    symbols = tickers.map(normalizeSymbol).filter(Boolean);
+                    root.innerHTML = '';
+                } catch (e) {
+                    root.innerHTML = '<div style="padding:40px;text-align:center;color:#e53935;">Не удалось загрузить список монет<br><small>' + e.message + '</small></div>';
+                    return;
+                }
+            }
+
+            if (symbols.length === 0) {
+                root.innerHTML = '<div style="padding:40px;text-align:center;color:var(--tg-theme-hint-color,#999);">Нет активных монет</div>';
+                return;
+            }
+
+            const mod = document.createElement('script');
+            mod.type = 'module';
+            mod.src = 'https://widgets.tradingview-widget.com/w/en/tv-market-data.js';
+            document.head.appendChild(mod);
+
+            const widget = document.createElement('tv-market-data');
+            widget.setAttribute('view', 'performance');
+            widget.setAttribute('heatmap', '');
+            widget.setAttribute('symbol-sectors', JSON.stringify([{
+                sectionName: sectionName,
+                symbols: symbols
+            }]));
+            widget.style.display = 'block';
+            widget.style.width = '100%';
+            widget.style.height = '100%';
+
+            root.appendChild(widget);
+        }
+    })();
+    </script>
+</body>
+</html>
