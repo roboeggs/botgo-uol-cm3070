@@ -114,7 +114,7 @@ For production, `WEBAPP_URL` should point to the deployed static host,
 for example:
 
 ```env
-WEBAPP_URL=https://roboeggs.github.io/
+WEBAPP_URL=https://roboeggs.github.io/botgo-uol-cm3070/
 ```
 
 ### 3. Set up the database
